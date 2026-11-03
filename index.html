@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Is This Job Real?</title>
+<meta name="description" content="Paste a job link and see the hiring signals behind it, taken from the employer's own job board.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow instrument column. The input sits on top, and the score reads on a ruled scale with the real band thresholds. */
+:root {
+  --bg: #eef2f4; --surface: #ffffff; --ink: #122029; --muted: #52646f; --line: #cdd8de;
+  --accent: #0b5cad; --accent-ink: #ffffff;
+  --strong: #0f7a55; --mixed: #a06400; --weak: #b23a2e; --focus: #0b5cad;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e171d; --surface: #16232b; --ink: #e7eef2; --muted: #9db0bb; --line: #2c3f4a;
+    --accent: #6db3f5; --accent-ink: #08233b;
+    --strong: #55cfa2; --mixed: #e6b04f; --weak: #f0897c; --focus: #6db3f5;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 1rem/1.55 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 56px;
+}
+main { max-width: 680px; margin: 0 auto; display: grid; gap: 28px; }
+.brand { font: 500 .8rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+h1 { font: 700 clamp(2.5rem, 9vw, 4.25rem)/1 var(--display); letter-spacing: -.03em; margin: 12px 0 14px; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); font-size: 1.125rem; max-width: 56ch; }
+form { display: flex; gap: 10px; flex-wrap: wrap; }
+label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+#job-url {
+  flex: 1 1 320px; min-width: 0; font: 400 1rem/1.3 var(--body); color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px;
+}
+#job-url::placeholder { color: var(--muted); }
+button {
+  font: 600 1rem/1 var(--body); color: var(--accent-ink); background: var(--accent);
+  border: 0; border-radius: 6px; padding: 14px 22px; cursor: pointer;
+}
+button[disabled] { opacity: .65; cursor: progress; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.hint { margin: 8px 0 0; font-size: .875rem; color: var(--muted); }
+#result { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 24px; display: grid; gap: 20px; }
+.tag { font: 500 .75rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.role h2 { font: 700 1.5rem/1.2 var(--display); margin: 8px 0 4px; overflow-wrap: anywhere; }
+.role p { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+.reading { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.number { font: 700 4rem/1 var(--display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.band { font-weight: 600; font-size: 1.125rem; }
+.is-strong { color: var(--strong); } .is-mixed { color: var(--mixed); } .is-weak { color: var(--weak); } .is-none { color: var(--muted); }
+.scale { position: relative; height: 12px; display: grid; grid-template-columns: 45fr 25fr 30fr; gap: 2px; margin-top: 12px; }
+.scale span:nth-child(1) { background: var(--weak); } .scale span:nth-child(2) { background: var(--mixed); } .scale span:nth-child(3) { background: var(--strong); }
+.scale span { opacity: .3; }
+.pin { position: absolute; top: -5px; width: 4px; height: 22px; margin-left: -2px; background: var(--ink); }
+.ticks { display: grid; grid-template-columns: 45fr 25fr 30fr; font: 400 .75rem/1 var(--mono); color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.reasons { list-style: none; margin: 0; padding: 0; display: grid; }
+.reasons li { display: grid; grid-template-columns: 3.25rem minmax(0, 1fr); gap: 10px; padding-block: 12px; border-top: 1px solid var(--line); }
+.points { font: 500 .9375rem/1.5 var(--mono); font-variant-numeric: tabular-nums; }
+.reasons strong { display: block; font-weight: 600; }
+.reasons span.detail { color: var(--muted); overflow-wrap: anywhere; }
+.note { margin: 0; font-size: .875rem; color: var(--muted); }
+#result a { color: var(--accent); }
+.message h2 { font: 700 1.5rem/1.2 var(--display); margin: 8px 0 6px; }
+.message p { margin: 0; color: var(--muted); }
+.how { display: grid; gap: 8px; }
+.how h2 { font: 700 1.25rem/1.2 var(--display); margin: 0; }
+.how p { margin: 0; color: var(--muted); max-width: 62ch; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="brand">Hiring Confidence</p>
+    <h1>Is this job real?</h1>
+    <p class="lede">Paste a job link. We read the employer's own job board and show you the signals before you spend an evening on the application.</p>
+  </header>
+
+  <section aria-label="Check a job">
+    <form id="check-form" novalidate>
+      <label for="job-url">Job link</label>
+      <input id="job-url" type="url" inputmode="url" autocomplete="off" placeholder="https://jobs.lever.co/company/job-id" required>
+      <button id="check-button" type="submit">Check this job</button>
+    </form>
+    <p class="hint">Works with Greenhouse, Lever and Ashby job links.</p>
+  </section>
+
+  <section id="result" aria-live="polite"></section>
+
+  <section class="how">
+    <h2>What the score means</h2>
+    <p>The score is an estimate from 5 to 95. It weighs posting age, reposts, pay transparency, duplicate listings and how actively the company posts. It cannot prove that a job is open or being filled, so we never call a job fake.</p>
+  </section>
+</main>
+
+<script>
+const ENDPOINT = "https://uiyianqarfalwkqzinpr.supabase.co/functions/v1/check-job";
+const BANDS = {
+  strong: { label: "Strong hiring signals", cls: "is-strong" },
+  mixed: { label: "Mixed hiring signals", cls: "is-mixed" },
+  weak: { label: "Weak hiring signals", cls: "is-weak" },
+  insufficient: { label: "Not enough history yet", cls: "is-none" },
+};
+const EXAMPLE = {
+  status: "scored", example: true, score: 83, band: "strong", company: "Example Company",
+  job: { title: "Senior Data Engineer", location: "Remote, US" },
+  reasons: [
+    { label: "Posting age", points: 25, detail: "Posted 6 days ago, according to the employer's feed." },
+    { label: "Pay transparency", points: 8, detail: "A salary figure appears in the posting." },
+  ],
+};
+
+const resultEl = document.getElementById("result");
+const form = document.getElementById("check-form");
+const input = document.getElementById("job-url");
+const button = document.getElementById("check-button");
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function formatPoints(points) {
+  if (points > 0) return "+" + points;
+  if (points < 0) return "−" + Math.abs(points);
+  return "0";
+}
+
+function safeLink(url) {
+  try { return new URL(url).protocol === "https:" ? url : null; } catch { return null; }
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+}
+
+function renderMessage(title, body, data) {
+  const box = el("div", "message");
+  box.append(el("p", "tag", data && data.company ? data.company : "Result"), el("h2", "", title), el("p", "", body));
+  const seen = data && data.lastCheckedAt ? formatTime(data.lastCheckedAt) : null;
+  if (seen) box.append(el("p", "note", "Board last read " + seen + "."));
+  resultEl.replaceChildren(box);
+}
+
+function renderScore(data) {
+  const band = BANDS[data.band] || BANDS.insufficient;
+  const nodes = [];
+
+  const role = el("div", "role");
+  role.append(el("p", "tag", data.example ? "Example result" : "Result"));
+  role.append(el("h2", "", data.job.title));
+  role.append(el("p", "", [data.company, data.job.location].filter(Boolean).join(" · ")));
+  nodes.push(role);
+
+  const gauge = el("div");
+  const reading = el("div", "reading");
+  reading.append(el("span", "number " + band.cls, data.band === "insufficient" ? "—" : String(data.score)));
+  reading.append(el("span", "band " + band.cls, band.label));
+  gauge.append(reading);
+  if (data.band !== "insufficient") {
+    const scale = el("div", "scale");
+    scale.setAttribute("aria-hidden", "true");
+    scale.append(el("span"), el("span"), el("span"));
+    const pin = el("i", "pin");
+    pin.style.left = data.score + "%";
+    scale.append(pin);
+    const ticks = el("div", "ticks");
+    ticks.setAttribute("aria-hidden", "true");
+    ticks.append(el("span", "", "0"), el("span", "", "45"), el("span", "", "70"));
+    gauge.append(scale, ticks);
+  }
+  nodes.push(gauge);
+
+  const list = el("ul", "reasons");
+  for (const reason of data.reasons || []) {
+    const item = el("li");
+    const tone = reason.points > 0 ? "is-strong" : reason.points < 0 ? "is-weak" : "is-none";
+    item.append(el("span", "points " + tone, formatPoints(reason.points)));
+    const text = el("div");
+    text.append(el("strong", "", reason.label), el("span", "detail", reason.detail));
+    item.append(text);
+    list.append(item);
+  }
+  nodes.push(list);
+
+  if (data.example) {
+    nodes.push(el("p", "note", "This is a made-up example. Paste a link above to check a real job."));
+  } else {
+    const note = el("p", "note", data.note + " ");
+    const seen = data.lastCheckedAt ? formatTime(data.lastCheckedAt) : null;
+    if (seen) note.append("Board last read " + seen + ". ");
+    const href = safeLink(data.job.url);
+    if (href) {
+      const a = el("a", "", "View the posting");
+      a.href = href; a.target = "_blank"; a.rel = "noopener noreferrer";
+      note.append(a);
+    }
+    nodes.push(note);
+  }
+  resultEl.replaceChildren(...nodes);
+}
+
+function render(data) {
+  if (data.status === "scored") return renderScore(data);
+  if (data.status === "not_listed") {
+    return renderMessage(
+      "Not on the employer's board",
+      data.message + " The role may be filled, paused or moved to a new link.",
+      data,
+    );
+  }
+  const titles = {
+    unsupported_link: "We can't read this link yet",
+    invalid_link: "Paste a job link",
+    not_found: "We couldn't find this job board",
+    rate_limited: "Please wait a moment",
+  };
+  renderMessage(titles[data.status] || "Something went wrong", data.message || "Please try again shortly.");
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const url = input.value.trim();
+  if (!url) {
+    render({ status: "invalid_link", message: "Copy the link from the job posting and paste it here." });
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Checking…";
+  try {
+    const response = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ url }),
+      signal: AbortSignal.timeout(30000),
+    });
+    render(await response.json());
+  } catch {
+    render({ status: "error", message: "We couldn't reach the checker. Check your connection and try again." });
+  } finally {
+    button.disabled = false;
+    button.textContent = "Check this job";
+  }
+});
+
+render(EXAMPLE);
+</script>
+</body>
+</html>
