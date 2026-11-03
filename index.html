@@ -86,6 +86,27 @@ button[disabled] { opacity: .65; cursor: progress; }
 }
 .trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 #signup-status { font-size: .875rem; min-height: 1.3em; }
+.join { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 24px; scroll-margin-top: 16px; }
+.join h2 { font: 700 1.5rem/1.2 var(--display); margin: 0; text-wrap: balance; }
+.join p { margin: 0; color: var(--muted); max-width: 62ch; }
+.join form { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); position: relative; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field.wide, .consent, .join button, .form-status { grid-column: 1 / -1; }
+.field label, .consent label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+.field label { font-weight: 500; font-size: .9375rem; }
+.field input, .field select {
+  width: 100%; min-width: 0; font: 400 1rem/1.3 var(--body); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 12px;
+}
+.field small { color: var(--muted); font-size: .8125rem; }
+.consent { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; font-size: .9375rem; color: var(--muted); }
+.consent input { margin-top: 4px; width: 18px; height: 18px; }
+.consent a, .site-foot a, .jump a { color: var(--accent); }
+.join button { justify-self: start; }
+.form-status { min-height: 1.3em; font-size: .9375rem; }
+.jump { margin: 14px 0 0; font-size: 1rem; color: var(--muted); }
+.site-foot { font-size: .875rem; color: var(--muted); }
+@media (max-width: 520px) { .join form { grid-template-columns: minmax(0, 1fr); } }
 .how { display: grid; gap: 8px; }
 .how h2 { font: 700 1.25rem/1.2 var(--display); margin: 0; }
 .how p { margin: 0; color: var(--muted); max-width: 62ch; }
@@ -97,6 +118,7 @@ button[disabled] { opacity: .65; cursor: progress; }
     <p class="brand">Hiring Confidence</p>
     <h1>Is this job real?</h1>
     <p class="lede">Paste a job link. We read the employer's own job board and show you the signals before you spend an evening on the application.</p>
+    <p class="jump"><a href="#candidates">Join the founding candidate pool</a> or <a href="#recruiters">apply as a pilot recruiter</a>.</p>
   </header>
 
   <section aria-label="Check a job">
@@ -109,6 +131,43 @@ button[disabled] { opacity: .65; cursor: progress; }
   </section>
 
   <section id="result" aria-live="polite"></section>
+
+  <section class="join" id="candidates" aria-labelledby="candidates-title">
+    <h2 id="candidates-title">Join the founding candidate pool</h2>
+    <p>We're building a small pool of senior tech professionals and asking employers to commit to replying. It's free during the pilot, and we review every application by hand. We won't share your resume with an employer unless you say yes to that specific employer first.</p>
+    <form id="candidate-form" novalidate>
+      <div class="field"><label for="c-name">Full name</label><input id="c-name" autocomplete="name" required></div>
+      <div class="field"><label for="c-email">Email</label><input id="c-email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="c-title">Current title</label><input id="c-title" autocomplete="organization-title" required></div>
+      <div class="field"><label for="c-years">Years of experience</label><input id="c-years" type="number" inputmode="numeric" min="0" max="60" step="1" required></div>
+      <div class="field"><label for="c-roles">Roles you want</label><input id="c-roles" placeholder="Staff engineer, data lead" required></div>
+      <div class="field"><label for="c-location">Location</label><input id="c-location" placeholder="Austin, or remote in the US" required></div>
+      <div class="field wide"><label for="c-linkedin">LinkedIn profile (optional)</label><input id="c-linkedin" type="url" inputmode="url" placeholder="https://www.linkedin.com/in/your-name"></div>
+      <div class="field wide"><label for="c-resume">Resume</label><input id="c-resume" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required><small>PDF or Word (.docx), up to 5 MB.</small></div>
+      <input class="trap" id="c-website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="consent"><input id="c-consent" type="checkbox" required><label for="c-consent">I agree to the <a href="/privacy.html">privacy notice</a> and confirm this resume is mine.</label></div>
+      <button id="candidate-button" type="submit">Join the candidate pool</button>
+      <p class="form-status" id="candidate-status" role="status"></p>
+    </form>
+  </section>
+
+  <section class="join" id="recruiters" aria-labelledby="recruiters-title">
+    <h2 id="recruiters-title">Hiring senior tech talent?</h2>
+    <p>Tell us what you're hiring for. We're looking for a few pilot teams that want fewer, more serious candidates and are willing to commit to replying to the people they consider. The pilot has no fee yet.</p>
+    <form id="recruiter-form" novalidate>
+      <div class="field"><label for="r-name">Full name</label><input id="r-name" autocomplete="name" required></div>
+      <div class="field"><label for="r-email">Work email</label><input id="r-email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="r-company">Company</label><input id="r-company" autocomplete="organization" required></div>
+      <div class="field"><label for="r-title">Your title</label><input id="r-title" autocomplete="organization-title" required></div>
+      <div class="field wide"><label for="r-roles">Roles you're hiring for</label><input id="r-roles" placeholder="Senior backend engineers, data leads" required></div>
+      <div class="field wide"><label for="r-commit">Could your team commit to replying to every candidate you consider within 5 business days?</label>
+        <select id="r-commit" required><option value="">Choose one</option><option value="yes">Yes</option><option value="maybe">Maybe, I'd want to discuss it</option><option value="no">Not at this time</option></select></div>
+      <input class="trap" id="r-website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="consent"><input id="r-consent" type="checkbox" required><label for="r-consent">I agree to the <a href="/privacy.html">privacy notice</a>.</label></div>
+      <button id="recruiter-button" type="submit">Apply for the pilot</button>
+      <p class="form-status" id="recruiter-status" role="status"></p>
+    </form>
+  </section>
 
   <section class="signup" aria-labelledby="signup-title">
     <h2 id="signup-title">Get the weekly hiring signals report</h2>
@@ -126,6 +185,8 @@ button[disabled] { opacity: .65; cursor: progress; }
     <h2>What the score means</h2>
     <p>The score is an estimate from 5 to 95. It weighs posting age, reposts, pay transparency, duplicate listings and how actively the company posts. It cannot prove that a job is open or being filled, so we never call a job fake.</p>
   </section>
+
+  <footer class="site-foot"><a href="/privacy.html">Privacy notice</a></footer>
 </main>
 
 <script>
@@ -306,7 +367,7 @@ signupForm.addEventListener("submit", async (event) => {
     });
     const data = await response.json();
     if (data.status === "subscribed") {
-      signupStatus.textContent = "You're on the list. The first report is on its way soon.";
+      signupStatus.textContent = "You're on the list. We'll email you when the first report is ready.";
       signupForm.hidden = true;
     } else {
       signupStatus.textContent = data.message || "Please try again shortly.";
@@ -316,6 +377,86 @@ signupForm.addEventListener("submit", async (event) => {
   } finally {
     signupButton.disabled = false;
   }
+});
+
+const POOL_ENDPOINT = "https://uiyianqarfalwkqzinpr.supabase.co/functions/v1/join-pool";
+const MAX_RESUME_BYTES = 5 * 1024 * 1024;
+
+function campaignSource() {
+  try { return new URLSearchParams(location.search).get("utm_source") || ""; } catch { return ""; }
+}
+
+function value(id) { return document.getElementById(id).value.trim(); }
+
+function readBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function submitPool(payload, form, button, status, success) {
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = "Sending…";
+  status.textContent = "";
+  try {
+    const response = await fetch(POOL_ENDPOINT, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(60000),
+    });
+    const data = await response.json();
+    if (data.status === "received") {
+      const section = form.parentElement;
+      form.hidden = true;
+      section.append(el("p", "form-status", success));
+    } else {
+      status.textContent = data.message || "Please try again shortly.";
+    }
+  } catch {
+    status.textContent = "We couldn't send this. Check your connection and try again.";
+  } finally {
+    button.disabled = false;
+    button.textContent = label;
+  }
+}
+
+document.getElementById("candidate-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const status = document.getElementById("candidate-status");
+  const file = document.getElementById("c-resume").files[0];
+  const required = ["c-name", "c-email", "c-title", "c-years", "c-roles", "c-location"];
+  if (required.some((id) => !value(id))) { status.textContent = "Fill in every required field."; return; }
+  if (!file) { status.textContent = "Attach your resume as a PDF or Word (.docx) file."; return; }
+  if (!/\.(pdf|docx)$/i.test(file.name)) { status.textContent = "Attach your resume as a PDF or Word (.docx) file."; return; }
+  if (file.size > MAX_RESUME_BYTES) { status.textContent = "Your resume must be 5 MB or smaller."; return; }
+  if (!document.getElementById("c-consent").checked) { status.textContent = "Please agree to the privacy notice to continue."; return; }
+  let resume;
+  try { resume = await readBase64(file); } catch { status.textContent = "We couldn't read that file. Please try a different copy."; return; }
+  await submitPool({
+    type: "candidate", fullName: value("c-name"), email: value("c-email"), currentTitle: value("c-title"),
+    yearsExperience: Number(value("c-years")), targetRoles: value("c-roles"), location: value("c-location"),
+    linkedinUrl: value("c-linkedin"), resume, consent: true, website: value("c-website"), source: campaignSource(),
+  }, form, document.getElementById("candidate-button"), status, "Thanks. We've received your application and will email you after we've reviewed it.");
+});
+
+document.getElementById("recruiter-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const status = document.getElementById("recruiter-status");
+  const required = ["r-name", "r-email", "r-company", "r-title", "r-roles", "r-commit"];
+  if (required.some((id) => !value(id))) { status.textContent = "Fill in every required field."; return; }
+  if (!document.getElementById("r-consent").checked) { status.textContent = "Please agree to the privacy notice to continue."; return; }
+  await submitPool({
+    type: "recruiter", fullName: value("r-name"), workEmail: value("r-email"), company: value("r-company"),
+    jobTitle: value("r-title"), rolesHiring: value("r-roles"), replyCommitment: value("r-commit"),
+    consent: true, website: value("r-website"), source: campaignSource(),
+  }, form, document.getElementById("recruiter-button"), status, "Thanks. We've received your details and will email you about the pilot.");
 });
 
 render(EXAMPLE);
